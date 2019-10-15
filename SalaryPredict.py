@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from math import sqrt
 from sklearn.metrics import mean_squared_error
 import csv
+from sklearn.ensemble import RandomForestRegressor
 
 
 class DataFrameImputer(TransformerMixin):
@@ -99,9 +100,9 @@ def main():
 
     #dataset = pd.read_csv("combined.csv")
 
-    dataset.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
-    dataset['Income'] = dataset['Income'].fillna(0)
-    print(dataset)
+    #dataset.dropna(axis=0, how='any', thresh=None, subset=None, inplace=False)
+    #dataset['Income'] = dataset['Income'].fillna(0)
+    #print(dataset)
 
     #dataset = ChangeGenderToNumber(dataset)
 
@@ -109,7 +110,8 @@ def main():
     dataset = pd.DataFrame(dataset)
     dataset = DataFrameImputer().fit_transform(dataset)
 
-    dataset = dataset.drop(labels='Instance', axis=1)
+    dataset = dataset.drop(['Instance'], axis=1)
+
 
     #Making dummies for the categorical data
     datasetDummy = ChangeStringToDummyNumbers(dataset)
@@ -124,6 +126,10 @@ def main():
     datasetNomScaled = pd.DataFrame(datasetNomScaled)
     datasetX = pd.concat([datasetNomScaled, datasetCat], axis=1)
 
+    #datasetX = datasetX.fillna(datasetX.mean())
+
+    print(datasetY)
+    #datasetX.to_csv('miracle.csv')
 
 
     XTrain, XTest, YTrain, YTest = train_test_split(datasetX, datasetY, test_size=0.3953612672, random_state=1)
@@ -132,7 +138,7 @@ def main():
     #XTest = datasetX2
     #YTest = datasetY2
 
-    #mlp_regressor = MLPRegressor(XTrain, YTrain)
+    mlp_regressor = MLPRegressor(XTrain, YTrain)
     mlp_regressor = MLPRegressor(hidden_layer_sizes=(50,2),
                          activation='relu',
                          solver='adam',
@@ -144,6 +150,10 @@ def main():
     mlp_regressor.fit(XTrain, YTrain)
 
     PredictY = mlp_regressor.predict(XTest)
+
+    #regressor = RandomForestRegressor(n_estimators=1, random_state=0)
+    #regressor.fit(XTrain, YTrain)
+    #PredictY = regressor.predict(XTest)
 
     rms = sqrt(mean_squared_error(YTest, PredictY))
     print(rms)
